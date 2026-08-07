@@ -1,0 +1,9 @@
+- name: network-observability-operator
+  base: /network-observability-operator
+  version: "1.11"
+- name: container_platform
+  base: /container_platform
+  version: "4.4"
+- name: container_platform
+  base: /container_platform
+  version: "4.2"

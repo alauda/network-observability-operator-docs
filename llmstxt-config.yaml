@@ -1,0 +1,28 @@
+# llms.txt generator configuration for alauda/network-observability-operator-docs
+project_name: "Alauda Container Platform Network Observability Operator Documentation"
+summary: "Documentation for deploying and using the Alauda Container Platform Network Observability Operator and its NetObserv CLI."
+
+include_patterns:
+  - "**/*.md"
+  - "**/*.mdx"
+
+exclude_patterns:
+  - "**/node_modules/**"
+  - "**/.git/**"
+  - "**/.yarn/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.builds/**"
+  - "**/llms.txt"
+  - "**/llmstxt-state.json"
+  - "**/CHANGELOG.md"
+  - "**/CONTRIBUTING.md"
+
+# Group sections starting from the repo root
+grouping_base_path: "."
+
+# Files per batch for AI processing
+batch_size: 15
+
+# Maximum words per generated file description
+description_max_words: 150
