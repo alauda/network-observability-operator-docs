@@ -21,7 +21,7 @@ spec:
     - name: doc-base
       value: network-observability-operator
 
-    # These values are injected automatically by Pipelines as Code.
+    # 下面这些变量都是 pac 触发时自动注入的
     - name: git-url
       value: "{{ repo_url }}"
     - name: git-revision
