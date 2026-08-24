@@ -313,3 +313,7 @@ spec:
 If you are using an existing ClickHouse server, make sure that the FlowCollector can reach the server address and that the referenced secret contains valid credentials.
 
 After the FlowCollector instance is created, the eBPF agents and the flow logs pipeline are deployed to the namespace specified by `.spec.namespace`.
+
+The console plugin is enabled by default.
+After the FlowCollector instance is ready, open the cluster console and go to __Observe__ > __Network Traffic__ to inspect Overview, Flows, and Topology.
+See [Use the Console](../how_to/console-usage.mdx) for the UI workflow.

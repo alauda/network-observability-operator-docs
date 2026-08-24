@@ -20,14 +20,17 @@ NetObserv includes these main components:
 
 - An eBPF agent that runs on cluster nodes and captures packets or flow data
 - A flow logs pipeline that enriches and exports flow logs
+- A console plugin that shows traffic overview, flow records, and topology in the cluster console
 - A CLI that supports on-demand packet capture and flow capture
 
-You can use NetObserv in either of these ways:
+You can use NetObserv in any of these ways:
 
 - Deploy the operator to collect and store cluster-wide flow logs continuously
-- Use the CLI to capture packets or flows for troubleshooting and export the results for offline analysis
+- Use the [console](../how_to/console-usage.mdx) to inspect traffic topology and flow records
+- Use the [CLI](../how_to/cli-usage.mdx) to capture packets or flows for troubleshooting and export the results for offline analysis
 
 Choose the operator-based deployment if you need continuous, cluster-wide visibility.
+Choose the console if you need to browse collected traffic in the cluster UI.
 Choose the CLI if you need short-term troubleshooting without changing the long-running collection setup.
 
 ## Recommended Workflow
@@ -40,7 +43,8 @@ For most deployments, follow this order:
 4. Install the NetObserv Operator.
 5. Create the ClickHouse authentication secret.
 6. Create the FlowCollector instance.
-7. Use the [CLI](../how_to/cli-usage.mdx) when you need packet or flow capture for troubleshooting.
+7. Use the [console](../how_to/console-usage.mdx) to inspect Overview, Flows, and Topology.
+8. Use the [CLI](../how_to/cli-usage.mdx) when you need packet or flow capture for troubleshooting.
 
 ## Operator Deployment Architecture
 
@@ -65,6 +69,11 @@ flowchart LR
         CH[ClickHouse Server]
     end
 
+    subgraph Console[Cluster Console]
+        UI[Network Traffic]
+        Plugin[Console Plugin]
+    end
+
     subgraph K8s[Kubernetes Control Plane]
         API[Kubernetes API]
     end
@@ -74,6 +83,8 @@ flowchart LR
     A3 -->|Sends network flow logs| P
     API -.->|Fetches metadata| P
     P -->|Writes enriched flow logs| CH
+    UI -->|Queries| Plugin
+    Plugin -->|Reads flow logs| CH
 ```
 
 ## CLI Architecture
