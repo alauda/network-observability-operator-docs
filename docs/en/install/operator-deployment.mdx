@@ -7,7 +7,7 @@ weight: 30
 To enable continuous network flow collection, you need:
 
 1. A reachable ClickHouse server for storing flow logs
-2. The NetObserv Operator
+2. The Network Observability Operator
 3. A FlowCollector instance
 
 The ClickHouse backend can be prepared in either of these ways:
@@ -31,7 +31,7 @@ If you use an existing ClickHouse server, prepare these values in advance:
 
 ## Optional: Deploy ClickHouse with the ClickHouse Operator
 
-If you already have a ClickHouse server for NetObserv, skip this section and go to [Install the NetObserv Operator](#install-the-netobserv-operator).
+If you already have a ClickHouse server for NetObserv, skip this section and go to [Install the Network Observability Operator](#install-the-netobserv-operator).
 
 ### Install the ClickHouse Operator
 
@@ -193,7 +193,7 @@ If you use a different namespace or name, replace `cpaas-system` and `netobserv`
 Record the ClickHouse endpoint address and credentials for later use.
 You will need this information when you create the FlowCollector instance.
 
-## Install the NetObserv Operator \{#install-the-netobserv-operator}
+## Install the Network Observability Operator \{#install-the-netobserv-operator}
 
 1. Navigate to **Administrator** > **Marketplace** > **OperatorHub**.
 
