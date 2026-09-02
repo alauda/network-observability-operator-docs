@@ -4,119 +4,160 @@ weight: 20
 
 # Use the Console
 
-After the NetObserv Operator is collecting flow logs, use the cluster console to inspect traffic topology and flow records.
+After the Network Observability Operator is collecting flow logs, use the cluster console to inspect traffic overview charts, flow records, and topology.
 
 The console plugin is enabled by default when you create a FlowCollector instance.
-It adds a __Network Traffic__ page to the cluster console.
+It adds a **Network Traffic** page under **Observe** in the cluster console.
 
 Use the console when you need to:
 
 - See where traffic is going across projects, namespaces, workloads, and nodes
 - Inspect individual flow records and export them for offline analysis
-- Compare traffic volume, DNS latency, TCP RTT, TLS usage, or packet drops when the corresponding eBPF features are enabled
+- Compare traffic volume, DNS latency, TCP RTT, or TLS usage when the corresponding eBPF features are enabled
 
-For on-demand packet or flow capture, use the [CLI](cli-usage.mdx) instead.
+For on-demand packet or flow capture, use the [CLI](cli-usage.mdx) instead of the console.
+
+![Network Traffic page](../assets/netobserv-console-network-traffic.png)
 
 ## Before You Start
 
 Make sure that:
 
 - You can open the target cluster in the <Term name="company"/> Container Platform console
-- The NetObserv Operator is installed
+- The Network Observability Operator is installed
 - A FlowCollector instance is created and ready
-- ClickHouse is reachable and is receiving flow logs
 
-If the __Observe__ > __Network Traffic__ menu is missing, confirm that the FlowCollector console plugin is enabled and that the FlowCollector instance is ready.
+The console plugin is deployed when ClickHouse is enabled and `spec.consolePlugin.enable` is not set to `false`.
+If **Observe** > **Network Traffic** is missing, confirm that the FlowCollector instance is ready and that the console plugin is enabled.
 
 ## Open Network Traffic
 
 1. Open the target cluster in the console.
 
-2. In the left navigation, go to __Observe__ > __Network Traffic__.
+2. In the product selector in the upper-left corner, select **Administrator**. Then, in the left navigation, go to **Observe** > **Network Traffic**.
 
 3. Choose one of these tabs:
 
-   - __Overview__: ranked charts for the current query
-   - __Flows__: a paginated table of flow records
-   - __Topology__: a graph of traffic between resources
+   - **Overview**: ranked charts for the current query
+   - **Flows**: a paginated table of flow records
+   - **Topology**: a graph of traffic between resources
 
-Query controls at the top of the page apply to the active tab.
-Filters in the page header apply to Overview, Flows, and Topology.
+The query controls under the tabs apply to the active tab.
+Filters in the page header apply to Overview, Flows, and Topology at the same time.
 
 ## Set the Time Range and Filters
 
 ### Time Range
 
-Select a time range for the current tab:
+Use the **Time Range** control on the right side of the query bar. All three tabs use the same presets: **Last 5 minutes**, **Last 15 minutes**, **Last 1 hour**, **Last 6 hours**, and **Custom**. The default is **Last 15 minutes**.
 
-- Last 5 minutes
-- Last 15 minutes
-- Last 1 hour
-- Last 6 hours
-- Custom
+If you choose **Custom**, pick a start time and end time.
+The end time cannot be later than the current time.
 
-The Flows and Overview tabs default to the last 15 minutes.
-The Topology tab defaults to the last 5 minutes.
-
-Custom ranges cannot end later than the current time.
+Changing the time range reloads the active tab.
 
 ### Filters
 
-In the filter bar, choose a field or a quick filter, then add a value.
+Use the filter bar in the content header to narrow the query.
 
-You can filter by common fields such as:
+1. Click the filter bar. The placeholder is **Select a field or quick filter**.
+2. Choose a field, or choose a quick filter preset.
+3. Choose an operator when the field supports more than one comparison.
+4. Enter or select a value, then apply the filter.
 
-- Namespace, Project, Name, Owner, Kind, and Resource
+You can add multiple filters to the same query. Repeat these steps for each field, and clear an individual filter tag to remove only that condition.
+
+![Network Traffic filters](../assets/netobserv-console-filters.png)
+
+Common fields include:
+
+- Project, Namespace, Name, Owner, and Kind
 - Source or destination IP, port, MAC, node, zone, and network name
 - Protocol, TCP flags, DSCP, bytes, and packets
-- Packet translation project fields when PacketTranslation is enabled
-- DNS, Flow RTT, TLS, and packet drop fields when the matching eBPF features are enabled
+- Translated source and destination fields, such as **Xlat Source IP**, **Xlat Source Port**, **Xlat Destination IP**, and **Xlat Destination Port**, when `PacketTranslation` is enabled
+- DNS, Flow RTT, and TLS fields when the matching eBPF features are enabled
 
-Supported operators include equals, not equals, contains, not contains, and numeric comparisons such as more than.
+Operators depend on the field type:
+The console displays these operators as symbols:
 
-Quick filter presets from the FlowCollector configuration appear in the same filter bar.
-The default presets include:
+| Field type     | UI symbol | Operator           | Meaning                                                             |
+| -------------- | --------- | ------------------ | ------------------------------------------------------------------- |
+| Text or number | `=`       | Equals             | Matches the field value exactly.                                    |
+| Text or number | `!=`      | Not equals         | Excludes records whose field value exactly matches the value.       |
+| Text           | `=~`      | Contains           | Matches records whose field value includes the entered text.        |
+| Text           | `!~`      | Not contains       | Excludes records whose field value includes the entered text.       |
+| Number         | `>=`      | More than or equal | Matches numeric values greater than or equal to the entered number. |
 
-- Applications
-- Infrastructure
-- Pods network
-- Services network
-- External ingress
-- External egress
+Common fields match either endpoint. For endpoint-specific filters, choose the corresponding field, such as **Source Namespace** or **Destination Namespace**, before you enter a value.
 
-Quick filters are not applied until you select them.
-Selecting a quick filter adds its conditions to the current filter set.
+To remove a filter, clear the corresponding tag in the filter bar.
 
-To match only one endpoint, choose the source, destination, or either-side direction when the selected field supports it.
+### Quick Filters
+
+Quick filter presets come from the FlowCollector configuration and appear in the same filter bar.
+Selecting a preset adds its conditions to the current filter set.
+Presets are not applied until you select them.
+
+The platform provides these presets by default:
+
+| Preset             | Matches                                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------------------- |
+| Pods network       | Pod-to-pod traffic                                                                                   |
+| Services network   | Traffic whose destination is a Service                                                               |
+| DNS                | Flows with a non-empty DNS name                                                                      |
+| Gateway            | Flows whose source or destination owner kind, including translated owner kind, is `Gateway`          |
+| VPC Egress Gateway | Flows whose source or destination owner kind, including translated owner kind, is `VpcEgressGateway` |
+
+If results look too narrow after you select a preset, clear its tag.
 
 ## Overview
 
 Use the Overview tab to compare the busiest endpoints in the selected time range.
 
+![Overview tab](../assets/netobserv-console-overview.png)
+
 The default Overview query uses:
 
 - Scope: Resource
 - Top N: 10
-- Datasource: ClickHouse, or Auto when more than one datasource is available
+- Datasource: ClickHouse
+- Time range: Last 15 minutes
 
-You can change the scope to Cluster, Network, Zone, Node, Project, Namespace, Owner, or Resource.
-Available scopes follow the frontend configuration of the deployed plugin.
+### Overview Query Controls
 
-Use the header actions to:
+| Control     | What it changes                                                                                                         |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Record type | Shown only when more than one log type is configured. The default is Flow logs.                                         |
+| Datasource  | ClickHouse.                                                                                                             |
+| Scope       | Cluster, Network, Zone, Node, Project, Namespace, Owner, or Resource. Available values follow the plugin configuration. |
+| Top N       | 5, 10, or 15. The default is 10.                                                                                        |
+| Time Range  | The window used to rank and chart the selected scope.                                                                   |
 
-- Refresh the panels
-- Download the current panel data
-- Open __Manage Panels__ to show, hide, or reorder charts
+### Overview Header Actions
+
+On the right side of the Overview header:
+
+1. Click the refresh icon to reload the panels.
+2. Click the download icon to export the current panel data.
+3. Click the gear icon to open **Manage Panels**.
+
+### Manage Panels
+
+1. Click the gear icon.
+2. Filter the list by category and statistic, for example Traffic, DNS, TCP RTT, TLS, or Custom.
+3. Select the panels to show. At least one panel must remain visible.
+4. Drag a row to change the panel order.
+5. Click the reset icon if you want to restore the default panel set.
+6. Click **Save**. Click **Cancel** to discard the changes.
 
 Default traffic panels include top average byte rates and top average packet rates.
-Additional panels appear only when the matching eBPF feature is enabled in the FlowCollector, for example:
+Additional panels appear only when the matching eBPF feature is enabled:
 
-- Packet drop rates, drop state, and drop cause when `pktDrop` is enabled
-- DNS latency and DNS name or response-code breakdowns when `DNSTracking` is enabled
-- TCP RTT panels when `FlowRTT` is enabled
-- TLS usage, version, group, and cipher-suite panels when `TLSTracking` is enabled
-
-Use __Manage Panels__ to add optional charts or restore the default panel set.
+| Feature                          | Example panels                                                |
+| -------------------------------- | ------------------------------------------------------------- |
+| DNS tracking (`DNSTracking`)     | DNS latency percentiles, DNS names, and DNS response codes    |
+| Flow RTT (`FlowRTT`)             | Minimum, average, maximum, P90, and P99 TCP RTT               |
+| TLS tracking (`TLSTracking`)     | TLS usage, version, group, and cipher suite                   |
 
 ## Flows
 
@@ -125,31 +166,65 @@ Use the Flows tab to inspect individual flow records.
 The default Flows query uses:
 
 - Record type: Flow logs, unless conversation tracking is also configured
-- Packet drop filter: All
+- Time range: Last 15 minutes
 - Page size: 50 records
 
-The record type and packet drop controls are shown only when more than one option is available.
-If packet drop tracking is enabled, you can limit the table to sent flows, flows with drops, or dropped traffic.
+### Flow Count Chart
 
-The table includes a foldable flow-count chart for the selected time range.
-Default columns include end time, source and destination names, namespaces, ports, and network names.
-Use __Manage Columns__ to show Project, owner, node, zone, protocol, bytes, packets, DNS, RTT, TLS, or packet drop columns.
+Above the table, a foldable chart shows the number of flows in the selected time range.
+The title includes the total count for that window.
+
+Use the expand and collapse hint to show or hide the chart.
+Hiding the chart does not change the table query.
+
+### Flow Table Columns
+
+Default columns include:
+
+- End Time
+- Source name, namespace, port, and network name
+- Destination name, namespace, port, and network name
+- Protocol
+
+TLS Version, DNS, Flow RTT, and packet translation columns are also enabled by default when their corresponding features are configured.
+
+Use **Manage Columns** to show additional columns such as Project, owner, node, zone, protocol, bytes, packets, DNS, RTT, or TLS fields.
+
+1. Click the gear icon in the Flows header.
+2. Choose a column group such as All, Source, Destination, or Time.
+3. Select the columns to display. At least one column must remain visible.
+4. Drag a row to change the column order.
+5. Click **Save**. Click **Cancel** to discard the changes.
+
+### Flow Details
+
+![Flow Details](../assets/netobserv-console-flow-details.png)
 
 To inspect one record:
 
 1. Click the details action on the row.
-2. Review the source, destination, and common fields.
-3. Close the dialog when you finish.
+2. Review the field table. The default group is **All**.
+3. Choose a group such as Source or Destination to focus the list.
+4. Click the magnifier icon on a field to add that field as a filter and close the dialog.
+5. Choose **Raw** to view the read-only JSON record.
+6. Click **Close** when you finish.
 
-To export the current query, click __Export CSV__.
-The export uses the current filters, time range, and visible query, and does not include a full-table count.
+### Export and Pagination
 
-Use the paginator to change pages or the page size.
+To export the current query, click **Export CSV** in the Flows header.
+The export uses the current filters, time range, and query.
+It does not include a full-table count.
+
+Use the paginator under the table to change pages or the page size.
 Available page sizes are 50, 100, 500, and 1000.
+
+A back-to-top control appears after you scroll the table.
 
 ## Topology
 
 Use the Topology tab to see how traffic moves between endpoints.
+
+![Topology tab](../assets/netobserv-console-topology.png)
 
 The default Topology query uses:
 
@@ -159,6 +234,9 @@ The default Topology query uses:
 - Groups: Auto
 - Layout: ColaNoForce
 - Datasource: Auto
+- Time range: Last 15 minutes
+
+### Topology Query Controls
 
 Choose a scope first.
 Available scopes include Cluster, Network, Zone, Node, Project, Namespace, Owner, and Resource.
@@ -167,24 +245,47 @@ Then choose the metric type:
 
 - Bytes
 - Packets
-- Dropped bytes or dropped packets, when packet drop tracking is enabled
 - DNS latencies, when DNS tracking is enabled
 - Flow RTT, when Flow RTT tracking is enabled
 
-Open __More Options__ to change the layout, grouping, metric function, datasource, and record type.
+Open **More Options** to change:
+
+| Control         | Options                                                             |
+| --------------- | ------------------------------------------------------------------- |
+| Layout          | ColaNoForce (default), BreadthFirst, Cola, Dagre, Force, Grid       |
+| Groups          | Auto, None, or a combination allowed by the current scope           |
+| Metric function | Latest rate, Average, Minimum, Maximum, Sum, P90, P99               |
+| Datasource      | Auto or ClickHouse                                                  |
+| Record type     | Shown only when both conversation and flow log types are configured |
 
 Grouping options depend on the current scope.
 When Project is available, Auto grouping uses Project, then Namespace, then Owner for workload scopes.
 
+### Topology Header Actions
+
 Use the topology header to:
 
-- Search for a node name
+- Search the topology for a node by its displayed name or associated metadata
 - Refresh the graph
 - Download the current topology data
 - Export a PNG image of the canvas
-- Show or hide edges and edge labels
+- Open topology settings and choose whether to show edges and edge labels
 
-Click a node or edge to add a filter and continue the investigation in Overview or Flows.
+Edge labels require edges to be visible.
+
+To search the topology, enter text in the search field and press Enter or click the search icon. Matching nodes are highlighted, and nonmatching nodes and edges are dimmed. The search does not change the backend query or add a flow filter. The search matches the displayed node name and associated metadata, such as the resource, owner, namespace, project, host, network, zone, cluster, or address.
+
+### Interact with the Topology Graph
+
+A topology node is an endpoint or an aggregated peer determined by the selected **Scope**; it is not always a Kubernetes **Node**. For example, **Scope: Node** shows Kubernetes nodes, while **Scope: Resource**, **Namespace**, **Project**, or **Owner** shows the corresponding resource or grouping.
+
+Topology nodes, edges, and groups are interactive:
+
+- Click a node to select it, highlight its connected edges and related nodes, and open a details drawer. The drawer can show endpoint details and metrics.
+- Click an edge to select the connection and open a details drawer with the connection direction and endpoint details. The drawer can also show metrics.
+- Click a group border or an empty area inside the group to select it and highlight its member nodes, connected edges, and adjacent nodes. Selecting a group does not open a details drawer.
+
+Clicking a node, edge, or group does not directly add a filter to the topology search field or the page filter bar. To filter by a value from a node or edge drawer, click the magnifier action next to a filterable field. The console then adds an equals filter to the page filter bar and reloads the query. You can switch to Overview or Flows to continue the investigation with that filter.
 
 ## Feature-Dependent Data
 
@@ -196,9 +297,14 @@ The example FlowCollector in [Deploy with the Operator](../install/operator-depl
 - `PacketTranslation`
 - `TLSTracking`
 
-Packet drop views require the `pktDrop` feature.
-Conversation record types require conversation log types in the FlowCollector processor configuration.
+| Feature             | Extra console data                                                                                  |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| `DNSTracking`       | DNS filters, columns, Overview panels, and topology DNS latency metric                              |
+| `FlowRTT`           | Flow RTT filters, columns, Overview panels, and topology RTT metric                                 |
+| `TLSTracking`       | TLS filters, columns, and Overview TLS panels                                                       |
+| `PacketTranslation` | Packet translation project fields and filters                                                       |
 
+Conversation record types require conversation log types in the FlowCollector processor configuration.
 If a panel, column, or metric is missing, check the FlowCollector feature list rather than the console page settings.
 
 ## Empty or Incomplete Results
@@ -207,8 +313,7 @@ If Network Traffic shows no data:
 
 1. Widen the time range and remove extra filters.
 2. Confirm that the FlowCollector instance is ready and that eBPF agents are running.
-3. Confirm that ClickHouse is enabled and receiving new flow logs.
-4. If you expected DNS, RTT, TLS, or drop data, confirm that the matching eBPF feature is enabled.
+3. Ask your platform administrator to verify that ClickHouse is enabled and receiving new flow logs.
+4. If you expected DNS, RTT, or TLS data, confirm that the matching eBPF feature is enabled.
 
-If results look too narrow, clear quick filters such as Applications or Pods network.
-Those presets only match application-layer or pod-to-pod traffic after you select them.
+If the page is missing from the console, confirm that the console plugin is enabled and that the FlowCollector instance is ready.
