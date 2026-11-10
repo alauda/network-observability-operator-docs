@@ -19,7 +19,7 @@ The build identifier is used to identify the immutable operator bundle and image
 | Item | Value |
 | --- | --- |
 | NetObserv release | `v1.11.6` |
-| ACP compatibility | ACP 4.3–4.5 planned; release validation pending |
+| ACP compatibility | ACP 4.3–4.5 planned; ACP 4.3 and 4.4 amd64 installation, functional smoke, and UI smoke passed on the final build; ACP 4.5 and ARM acceptance remain pending |
 | Package channel | `alpha` package channel in the release artifact repository |
 | Supported package architectures | `amd64`, `arm64`, and `ALL` package variants are produced |
 | Previous release | `v1.11.5` |
@@ -51,8 +51,8 @@ The architecture package being available does not by itself replace the platform
 ## Known limitations
 
 - Agent dashboard panels require the ACP node firewall to allow TCP port `9400` from the metrics scraper to the host-networked eBPF agent. If the platform firewall does not include this port, agent panels can be empty even when the agent itself is healthy.
-- The intended support range is ACP 4.3–4.5. Final-build installation, UI, upgrade, and ARM validation are still required before publishing compatibility as a release guarantee. Performance and disaster recovery must be tracked separately in the release test report.
-- `MonitorDashboard` garbage collection after deleting a `FlowCollector` must be verified in an isolated environment before it is treated as a release guarantee.
+- The intended support range is ACP 4.3–4.5. Final-build installation, functional smoke, and UI smoke passed on ACP 4.3/4.4 amd64 only. ACP 4.5 environment provisioning failed before product installation; ARM native package/UI and upgrade from `v1.11.5` remain unverified. Do not publish the full compatibility range as a release guarantee before these gates pass. Performance and disaster recovery must be tracked separately in the release test report.
+- `MonitorDashboard` garbage collection after deleting a `FlowCollector` passed on the final ALL package in ACP 4.4/amd64; it has not been separately verified on ARM or ACP 4.3/4.5.
 
 ## Upgrade notes
 
