@@ -10,6 +10,8 @@ To enable continuous network flow collection, you need:
 2. The NetObserv Operator
 3. A FlowCollector instance
 
+On ACP clusters with firewalld enabled, first [allow TCP port 9400 on agent nodes](./prerequisites.mdx#allow-agent-metrics-through-the-node-firewall) so the metrics scraper can reach the host-networked eBPF agent. Without this rule, agent Dashboard panels can remain empty even when flow collection is working.
+
 The ClickHouse backend can be prepared in either of these ways:
 
 - Use an existing ClickHouse server and provide its connection information in the FlowCollector configuration

@@ -62,6 +62,19 @@ kubectl netobserv packets help
 kubectl netobserv flows help
 ```
 
+## Enable Shell Completion
+
+Generate completion for the shell you use; this command does not need cluster access:
+
+```bash
+# Bash, for the current shell session
+source <(kubectl netobserv completion bash)
+# Zsh, for the current shell session
+source <(kubectl netobserv completion zsh)
+```
+
+Run only the line for your shell. Completion includes the packet-capture Deployment and Pod selector options.
+
 ## Capture Packets
 
 Packet capture records raw packets that match the filters you specify.
@@ -139,6 +152,52 @@ Example command for capturing TCP packets on port 8080, including Geneve-encapsu
 ```bash
 kubectl netobserv packets --enable_geneve --protocol=TCP --port=8080
 ```
+
+### Capture Traffic for Deployments or Selected Pods
+
+Use `--deployment=namespace/name:port` to resolve the running Pods owned by a Deployment to their Pod IPs when the capture starts. For example, capture packets involving either the load balancer Pods on port 80 or the backend Pods on port 8080:
+
+```bash
+kubectl netobserv packets --deployment=shop/lb:80 --deployment=shop/app:8080 --protocol=TCP
+```
+
+Use `--pod-selector=namespace/labelSelector:port` for running Pods selected by labels instead:
+
+```bash
+kubectl netobserv packets '--pod-selector=shop/app.kubernetes.io/name in (frontend,api):8080' --protocol=TCP
+```
+
+Both options can be repeated or combined. Each target matches traffic with either endpoint at its Pod IP and the specified port; multiple targets are joined with OR, **not** limited to traffic between the listed workloads. The CLI prints the equivalent packet filter before it creates capture resources. Pod IPs are a snapshot: rerun the capture after a rollout to include replacement Pods. A selector without an eligible running Pod and Pod IP fails before creating resources.
+
+These options are available for `packets`, not `flows`. Do not combine them with native CIDR, peer, or port filters, or a manual OR expression. The packet filter map defaults to 16 distinct Pod IPs. For more IPs, specify a sufficient capacity and use a packet agent image that supports it:
+
+```bash
+kubectl netobserv packets --deployment=shop/lb:80 --deployment=shop/app:8080 --filter-map-entries=32 --protocol=TCP
+```
+
+### Set Packet File Size
+
+By default, packet capture does not split the pcap output. To write size-limited pcap shards, set `--split-bytes` on a `packets` capture:
+
+```bash
+kubectl netobserv packets --port=8080 --split-bytes=64KiB --copy
+```
+
+The value accepts a byte count or a size suffix such as `64KiB` or `500MB`; `--split-bytes=0` disables splitting. This option does not apply to `flows`.
+
+### Limit Capture Duration and Total Size \{#limit-capture-duration-and-total-size}
+
+Both packet and flow captures accept `--max-time` (default `5m`) and `--max-bytes` (default `50000000` bytes). For example, stop a packet capture after 15 minutes or when the overall capture reaches 500 MB, whichever happens first:
+
+```bash
+kubectl netobserv packets --background --port=8080 --max-time=15m --max-bytes=500MB
+kubectl netobserv follow
+# After capture stops, copy the output and remove the capture resources.
+kubectl netobserv copy
+kubectl netobserv cleanup
+```
+
+`--max-bytes` accepts a byte count or a size suffix such as `500MB` or `10G`; invalid sizes are rejected before capture resources are created. It limits the total capture, whereas `--split-bytes` controls each packet pcap shard. In background mode, reaching either limit stops the eBPF agents but leaves the collector available for `copy`; run `cleanup` after copying. The packet capture metadata reports `max_bytes_reached` if the overall size limit was reached. To stop an active background capture early, run `kubectl netobserv stop` before `copy`.
 
 ### Run Packet Capture in TUI Mode
 
