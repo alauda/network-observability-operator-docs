@@ -1,0 +1,23 @@
+---
+weight: 50
+---
+
+# Product Delivery
+
+## Package
+
+NetObserv Operator is delivered as a Violet package containing the operator bundle, CSV, and related image references. The release owner provides the immutable package URL and SHA256 checksum for the target architecture.
+
+For `v1.11.6`, the package variants are `amd64`, `arm64`, and `ALL`. Select a package that matches the target cluster architecture. A package URL is not a substitute for checksum verification.
+
+## Delivery checklist
+
+- Verify the package name, version, architecture, URL, and SHA256 checksum.
+- Verify that the package's bundle and related images correspond to the release version in the release notes.
+- Upload the package using the platform Violet workflow.
+- Wait for the Subscription, InstallPlan, and CSV to converge successfully.
+- Verify the operator and managed workloads before creating or reusing a `FlowCollector`.
+
+## Documentation and support
+
+Use [Prerequisites](../install/prerequisites.mdx), [Deploy with the Operator](../install/operator-deployment.mdx), and [Upgrade Path](../upgrade/upgrade-path.mdx) together. Release-specific fixes and limitations are listed in the [Release Notes](./release_notes.mdx).

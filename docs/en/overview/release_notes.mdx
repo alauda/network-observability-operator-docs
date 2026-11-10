@@ -1,0 +1,54 @@
+---
+weight: 30
+---
+
+# Release Notes
+
+This page describes the `v1.11.6` NetObserv release for Alauda Container Platform.
+
+The packaged build for this release is:
+
+```text
+v1.11.6-build.20261109084646
+```
+
+The build identifier is used to identify the immutable operator bundle and images. Use the package URL supplied by the release owner when downloading the package; do not substitute an earlier build with a similar version.
+
+## Compatibility and support matrix
+
+| Item | Value |
+| --- | --- |
+| NetObserv release | `v1.11.6` |
+| ACP compatibility | ACP 4.4 |
+| Package channel | `alpha` package channel in the release artifact repository |
+| Supported package architectures | `amd64`, `arm64`, and `ALL` package variants are produced |
+| Previous release | `v1.11.5` |
+| Upgrade path | See [Upgrade Path](../upgrade/upgrade-path.mdx) |
+| Lifecycle | See [Lifecycle Policy](./lifecycle_policy.mdx) |
+
+The architecture package being available does not by itself replace the platform and kernel prerequisites. Check [Prerequisites](../install/prerequisites.mdx) before installation.
+
+## Features and enhancements
+
+- Adds Pod label selector snapshots to the packet-capture CLI. The selector is resolved to Pod IP and port targets when a capture starts.
+- Adds Bash and Zsh completion for the NetObserv CLI options, including deployment and Pod selector targets.
+- Makes the packet-capture default explicit: captures are `not-split` unless `--split-bytes` is provided.
+- Adds managed `MonitorDashboard` reconciliation when the ACP Dashboard API is available. The dashboard is owned by `FlowCollector/cluster` and is placed in the Container Platform dashboard folder.
+- Extends automated coverage for native ClickHouse flow records, packet capture, HTTPS/TLS data-plane endpoints, dashboard ownership, and the Console Overview, Flows, and Topology views.
+
+## Fixed issues
+
+- Corrects dashboard ownership and dashboard folder metadata for the NetObserv dashboard.
+- Prevents the CLI from creating a capture when a Pod selector has no eligible running Pod with a Pod IP.
+- Makes packet shard validation fail before resources are created when the requested value is invalid.
+- Improves UI test report collection so a complete report includes the HTML report and browser evidence.
+
+## Known limitations
+
+- Agent dashboard panels require the ACP node firewall to allow TCP port `9400` from the metrics scraper to the host-networked eBPF agent. If the platform firewall does not include this port, agent panels can be empty even when the agent itself is healthy.
+- The standard release verification covers ACP 4.4. Compatibility with other ACP release lines, upgrade behavior, performance, disaster recovery, and formal ARM remote-package acceptance must be tracked separately in the release test report.
+- `MonitorDashboard` garbage collection after deleting a `FlowCollector` must be verified in an isolated environment before it is treated as a release guarantee.
+
+## Upgrade notes
+
+Before upgrading, save the existing `FlowCollector` configuration and verify that the ClickHouse endpoint and credentials remain available. Follow the [Upgrade Path](../upgrade/upgrade-path.mdx), then verify the operator, eBPF agent, flow logs pipeline, Console plugin, and `FlowCollector` status.
