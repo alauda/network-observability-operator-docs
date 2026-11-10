@@ -4,13 +4,13 @@ weight: 10
 
 # Upgrade Path
 
-This page describes the planned upgrade path for NetObserv Operator `v1.11.6` on ACP 4.3–4.5. Validation from `v1.11.5` is pending release acceptance; do not treat this page as a passed upgrade report.
+This page describes the planned upgrade path for NetObserv Operator `v1.11.6` on ACP 4.3–4.5. The native Violet/OLM upgrade from `v1.11.5` to build `v1.11.6-build.20261110105519` has been validated on ACP 4.4 amd64 only. ACP 4.3, ACP 4.5, and ARM upgrade acceptance is still pending; this procedure does not establish support for those combinations.
 
 ## Supported path
 
 | Current release | Target release | Method | Notes |
 | --- | --- | --- | --- |
-| `v1.11.5` | `v1.11.6` | Upload the target Violet package and let the platform OLM installation converge | Back up the `FlowCollector` before upgrading and verify the target package architecture |
+| `v1.11.5` | `v1.11.6` (build `v1.11.6-build.20261110105519`) | Upload the target Violet package and let the platform OLM installation converge | Validated on ACP 4.4 amd64 with the final ALL package; back up the `FlowCollector` and verify the target package architecture. Other platform/architecture combinations remain pending. |
 | `v1.11.6-build.*` | A later `v1.11.6` build explicitly listed by the release owner | Use the target package selected by the release owner | Do not replace a package by tag alone; verify the package checksum and bundle digest |
 
 Do not skip directly from an unsupported release without first checking its CRD, OLM, and data-storage compatibility. If the current version is not listed in the table, contact the release owner before upgrading.
@@ -32,6 +32,7 @@ Do not skip directly from an unsupported release without first checking its CRD,
 ## Post-upgrade verification
 
 - Query a recent flow record in the configured ClickHouse backend.
+- Verify that the `FlowCollector` UID has not changed and that flow records captured before the upgrade remain available within the configured retention period.
 - Run a short packet capture with the CLI and confirm that the resulting pcapng is readable.
 - Open the NetObserv Console views and verify Overview, Flows, and Topology.
 - Check agent metrics collection. The ACP node firewall must allow TCP `9400` for host-networked agent metrics.
