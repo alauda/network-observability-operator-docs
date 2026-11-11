@@ -10,6 +10,22 @@ Before you deploy Network Observability, make sure that you have:
 - The NetObserv Operator package, which is installed in the fixed namespace `netobserv-operator`
 - A reachable ClickHouse server, either existing or newly deployed
 - ClickHouse credentials that can be stored in a Kubernetes secret
+- On ACP nodes with firewalld enabled, TCP port `9400` allowed from the metrics scraper to the node IP on every node running the eBPF agent
+
+## Allow Agent Metrics Through the Node Firewall \{#allow-agent-metrics-through-the-node-firewall}
+
+The eBPF agent uses the host network and exposes Prometheus metrics on each node's IP address at TCP port `9400`. If firewalld blocks this port, the agent can be healthy while its metrics are not collected and the agent Dashboard panels remain empty. This requirement applies to ACP clusters with a node firewall; it is not a port that needs to be exposed to the public Internet.
+
+On each node that runs the eBPF agent, allow traffic from the metrics scraper according to your firewall policy. For a firewalld configuration that permits opening the port in the active zone, run on the node:
+
+```bash
+sudo firewall-cmd --add-port=9400/tcp
+sudo firewall-cmd --permanent --add-port=9400/tcp
+sudo firewall-cmd --query-port=9400/tcp
+sudo firewall-cmd --permanent --query-port=9400/tcp
+```
+
+Both queries must return `yes`. The runtime rule takes effect immediately; the permanent rule survives a restart. If your environment uses a restricted zone or source-specific rules, allow only the metrics scraper's source instead of opening the port to all sources in that zone. Do not reload firewalld just to apply this change on an active node.
 
 ## Kernel Requirements
 

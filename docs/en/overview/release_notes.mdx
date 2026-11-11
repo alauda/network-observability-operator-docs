@@ -1,0 +1,59 @@
+---
+weight: 30
+---
+
+# Release Notes
+
+This page describes the `v1.11.6` NetObserv release for Alauda Container Platform.
+
+The packaged build for this release is:
+
+```text
+v1.11.6-build.20261110105519
+```
+
+The build identifier is used to identify the immutable operator bundle and images. Use the package URL supplied by the release owner when downloading the package; do not substitute an earlier build with a similar version.
+
+## Compatibility and support matrix
+
+| Item | Value |
+| --- | --- |
+| NetObserv release | `v1.11.6` |
+| ACP compatibility | ACP 4.3–4.5 planned; ACP 4.3 and 4.4 amd64 installation, functional smoke, and UI smoke passed on the final build; a `v1.11.5` to final-build native upgrade passed on ACP 4.4 amd64; ACP 4.5 and ARM acceptance remain pending |
+| Package channel | `alpha` package channel in the release artifact repository |
+| Supported package architectures | `amd64`, `arm64`, and `ALL` package variants are produced |
+| Previous release | `v1.11.5` |
+| Upgrade path | See [Upgrade Path](../upgrade/upgrade-path.mdx) |
+| Lifecycle | See [Lifecycle Policy](./lifecycle_policy.mdx) |
+
+The architecture package being available does not by itself replace the platform and kernel prerequisites. Check [Prerequisites](../install/prerequisites.mdx) before installation.
+
+## Features and enhancements
+
+- Adds Pod label selector snapshots to the packet-capture CLI. The selector is resolved to Pod IP and port targets when a capture starts.
+- Adds Bash and Zsh completion for the NetObserv CLI options, including deployment and Pod selector targets.
+- Makes the packet-capture default explicit: captures are `not-split` unless `--split-bytes` is provided.
+- Supports human-readable `--max-bytes` limits such as `500MB` and `10G`, and reports the effective capture limits. Use `--max-time` to bound capture duration; see [CLI usage](../how_to/cli-usage.mdx#limit-capture-duration-and-total-size).
+- Adds managed `MonitorDashboard` reconciliation when the ACP Dashboard API is available. The dashboard is owned by `FlowCollector/cluster` and is placed in the Container Platform dashboard folder.
+- Extends automated coverage for native ClickHouse flow records, packet capture, HTTPS/TLS data-plane endpoints, dashboard ownership, and the Console Overview, Flows, and Topology views.
+
+## Fixed issues
+
+- Corrects dashboard ownership and dashboard folder metadata for the NetObserv dashboard.
+- Prevents the CLI from creating a capture when a Pod selector has no eligible running Pod with a Pod IP.
+- Makes packet shard validation fail before resources are created when the requested value is invalid.
+- Improves UI test report collection so a complete report includes the HTML report and browser evidence.
+
+## Security fixes
+
+- Rebuilds the operator and data-plane image with a base image that fixes `CVE-2026-4738` (zlib). The earlier `v1.11.6-build.20261109084646` packages are superseded and must not be installed for this release. Final security acceptance and architecture-specific scans are tracked in the release test report.
+
+## Known limitations
+
+- Agent dashboard panels require the ACP node firewall to allow TCP port `9400` from the metrics scraper to the host-networked eBPF agent. If the platform firewall does not include this port, agent panels can be empty even when the agent itself is healthy.
+- The intended support range is ACP 4.3–4.5. Final-build installation, functional smoke, and UI smoke passed on ACP 4.3/4.4 amd64. A native Violet/OLM upgrade from `v1.11.5` to the final ALL build passed on ACP 4.4 amd64: the `FlowCollector` UID and pre-upgrade flow records were retained, and post-upgrade functional and UI smoke each passed 4/4. This does not establish upgrade acceptance on ACP 4.3, ACP 4.5, or ARM. ACP 4.5 environment provisioning failed before product installation, and ARM native package/UI acceptance remains pending. Do not publish the full compatibility range as a release guarantee before these gates pass. Performance and disaster recovery must be tracked separately in the release test report.
+- `MonitorDashboard` garbage collection after deleting a `FlowCollector` passed on the final ALL package in ACP 4.4/amd64; it has not been separately verified on ARM or ACP 4.3/4.5.
+
+## Upgrade notes
+
+Before upgrading, save the existing `FlowCollector` configuration and verify that the ClickHouse endpoint and credentials remain available. Follow the [Upgrade Path](../upgrade/upgrade-path.mdx), then verify the operator, eBPF agent, flow logs pipeline, Console plugin, and `FlowCollector` status.

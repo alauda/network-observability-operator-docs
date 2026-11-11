@@ -1,0 +1,30 @@
+---
+weight: 40
+---
+
+# Lifecycle Policy
+
+This policy applies to the NetObserv Operator release line documented by this site. The release owner publishes the effective dates for each release in the release announcement and release notes.
+
+## Lifecycle stages
+
+| Stage | Meaning |
+| --- | --- |
+| Active maintenance | Defects and security issues are evaluated for the release. Documentation and upgrade guidance are maintained. |
+| Security maintenance | Security fixes are evaluated; ordinary feature requests are moved to a newer supported release. |
+| End of support | No new fixes, package rebuilds, or compatibility commitments are made for the release. Upgrade to a supported release. |
+
+## Version policy
+
+- `v1.11.6` is the planned NetObserv release for ACP 4.3–4.5; the release date and support commitment take effect only after release approval.
+- Patch builds retain the `v1.11.6-build.<timestamp>` identifier so that an immutable bundle and its images can be traced to a CI build.
+- A later patch build supersedes an earlier build only when it is explicitly listed in the release artifact repository and release notes.
+- Security fixes are published through the security advisory and Errata process when applicable.
+
+## Support commitment
+
+For the dates and status of this release, use the release announcement linked from the [Release Notes](./release_notes.mdx). The release owner must update this page or the release notes when the release moves to security-only maintenance or end of support.
+
+## Upgrade recommendation
+
+Customers should remain on a release that is within its maintenance period and should plan an upgrade before the end-of-support date. See [Upgrade Path](../upgrade/upgrade-path.mdx) for supported upgrade steps and limitations.

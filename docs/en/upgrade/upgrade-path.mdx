@@ -1,0 +1,43 @@
+---
+weight: 10
+---
+
+# Upgrade Path
+
+This page describes the planned upgrade path for NetObserv Operator `v1.11.6` on ACP 4.3–4.5. The native Violet/OLM upgrade from `v1.11.5` to build `v1.11.6-build.20261110105519` has been validated on ACP 4.4 amd64 only. ACP 4.3, ACP 4.5, and ARM upgrade acceptance is still pending; this procedure does not establish support for those combinations.
+
+## Supported path
+
+| Current release | Target release | Method | Notes |
+| --- | --- | --- | --- |
+| `v1.11.5` | `v1.11.6` (build `v1.11.6-build.20261110105519`) | Upload the target Violet package and let the platform OLM installation converge | Validated on ACP 4.4 amd64 with the final ALL package; back up the `FlowCollector` and verify the target package architecture. Other platform/architecture combinations remain pending. |
+| `v1.11.6-build.*` | A later `v1.11.6` build explicitly listed by the release owner | Use the target package selected by the release owner | Do not replace a package by tag alone; verify the package checksum and bundle digest |
+
+Do not skip directly from an unsupported release without first checking its CRD, OLM, and data-storage compatibility. If the current version is not listed in the table, contact the release owner before upgrading.
+
+## Before you upgrade
+
+1. Record the current operator version, package checksum, `FlowCollector` YAML, ClickHouse endpoint, and authentication Secret reference.
+2. Confirm that the cluster meets the [prerequisites](../install/prerequisites.mdx), including the kernel and node firewall requirements.
+3. Download the target package from the release-owner-provided URL and verify its SHA256 checksum.
+4. Check the target release notes and known issues.
+
+## Upgrade
+
+1. Upload the target package with the platform `violet` workflow.
+2. Wait for the target Subscription, InstallPlan, and CSV to reach their successful states.
+3. Confirm that the operator, eBPF agent DaemonSet, flow logs pipeline, and Console plugin have the target image digest and the expected ready replicas.
+4. Confirm `FlowCollector/cluster` reports `Ready=True`.
+
+## Post-upgrade verification
+
+- Query a recent flow record in the configured ClickHouse backend.
+- Verify that the `FlowCollector` UID has not changed and that flow records captured before the upgrade remain available within the configured retention period.
+- Run a short packet capture with the CLI and confirm that the resulting pcapng is readable.
+- Open the NetObserv Console views and verify Overview, Flows, and Topology.
+- Check agent metrics collection. The ACP node firewall must allow TCP `9400` for host-networked agent metrics.
+- Keep the old package, test report, and upgrade logs until the release has passed the release review.
+
+## Rollback and recovery
+
+The platform OLM workflow does not provide an in-place downgrade guarantee. If an upgrade fails, preserve the CSV, InstallPlan, operator logs, and test report. Contact the release owner before attempting a removal and reinstall with a known-good package; do not treat changing `startingCSV` as a rollback.
